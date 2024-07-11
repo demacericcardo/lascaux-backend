@@ -7,6 +7,10 @@ namespace DAL.Models.Context
 {
     public class MainDbContext(DbContextOptions<MainDbContext> options) : IdentityDbContext<User, IdentityRole<int>, int>(options)
     {
+        public DbSet<Schedule> Schedules { get; set; } = null!;
+        public DbSet<Film> Films { get; set; } = null!;
+        public DbSet<Screen> Screens { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

@@ -1,3 +1,5 @@
+using BL.Services.FilmServ;
+using BL.Services.ScreenServ;
 using BL.Services.UserServ;
 using DAL.Models;
 using DAL.Models.Context;
@@ -59,9 +61,14 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 
 //SERVICES
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFilmService, FilmService>();
+builder.Services.AddScoped<IScreenService, ScreenService>();
 
 //AUTOMAPPER
 builder.Services.AddAutoMapper(typeof(Program));
+
+//CONTEXT ACCESSOR
+builder.Services.AddHttpContextAccessor();
 
 WebApplication app = builder.Build();
 

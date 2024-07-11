@@ -3,11 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DAL.Models.Base
 {
-    public class BaseEntity<T> : IBaseEntity where T : struct
+    public class BaseEntity : IBaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public virtual T Id { get; set; }
+        public virtual int Id { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }
