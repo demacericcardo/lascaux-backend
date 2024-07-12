@@ -1,24 +1,22 @@
 ﻿using BL.Dtos;
 using BL.Responses;
 using DAL.Models;
-using DAL.Models.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace BL.Services.UserServ
 {
     public class UserService
     (
-        MainDbContext context,
         UserManager<User> userManager,
         SignInManager<User> signInManager,
+        RoleManager<IdentityRole<int>> roleManager,
         IHttpContextAccessor httpContextAccessor
     ) : IUserService
     {
-        private readonly MainDbContext _context = context;
         private readonly UserManager<User> _userManager = userManager;
         private readonly SignInManager<User> _signInManager = signInManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager = roleManager;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         public async Task<ServiceResponse> LoginAsync(UserLoginDto model)
@@ -76,6 +74,59 @@ namespace BL.Services.UserServ
 
                 if (currentUser != null)
                     response.Value = true;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse> CreateAsync()
+        {
+            ServiceResponse response = new();
+
+            try
+            {
+                User newUser = new()
+                {
+                    UserName = "admin",
+                    Email = ""
+                };
+
+                IdentityResult result = await _userManager.CreateAsync(newUser, "admin");
+
+                if (!result.Succeeded)
+                    throw new Exception(result.Errors.Select(e => e.Description).Aggregate((a, b) => $"{a} {b}"));
+
+                await _userManager.AddToRoleAsync(newUser, "Admin");
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse> CreateRoleAsync()
+        {
+            ServiceResponse response = new();
+
+            try
+            {
+                IdentityRole<int> newRole = new()
+                {
+                    Name = "Admin"
+                };
+
+                IdentityResult result = await _roleManager.CreateAsync(newRole);
+
+                if (!result.Succeeded)
+                    throw new Exception(result.Errors.Select(e => e.Description).Aggregate((a, b) => $"{a} {b}"));
             }
             catch (Exception ex)
             {

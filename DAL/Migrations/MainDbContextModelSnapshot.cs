@@ -46,6 +46,9 @@ namespace DAL.Migrations
                     b.Property<int>("MinuteLenght")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ScheduleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -55,25 +58,21 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ScheduleId");
+
                     b.ToTable("Films");
                 });
 
             modelBuilder.Entity("DAL.Models.Schedule", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int>("FK_Film")
-                        .HasColumnType("int");
 
                     b.Property<int>("FK_Screen")
                         .HasColumnType("int");
@@ -85,8 +84,6 @@ namespace DAL.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FK_Film");
 
                     b.HasIndex("FK_Screen");
 
@@ -321,21 +318,22 @@ namespace DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("DAL.Models.Film", b =>
+                {
+                    b.HasOne("DAL.Models.Schedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId");
+
+                    b.Navigation("Schedule");
+                });
+
             modelBuilder.Entity("DAL.Models.Schedule", b =>
                 {
-                    b.HasOne("DAL.Models.Film", "Film")
-                        .WithMany("Schedules")
-                        .HasForeignKey("FK_Film")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DAL.Models.Screen", "Screen")
                         .WithMany("Schedules")
                         .HasForeignKey("FK_Screen")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Film");
 
                     b.Navigation("Screen");
                 });
@@ -389,11 +387,6 @@ namespace DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("DAL.Models.Film", b =>
-                {
-                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("DAL.Models.Screen", b =>

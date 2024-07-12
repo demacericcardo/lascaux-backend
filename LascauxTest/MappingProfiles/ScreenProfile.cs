@@ -10,6 +10,7 @@ namespace LascauxTest.MappingProfiles
         {
             CreateMap<ScreenInputDto, Screen>();
             CreateMap<Screen, ScreenOutputDto>();
+            CreateMap<Screen, ScreenOutputNoRefDto>();
         }
     }
 }

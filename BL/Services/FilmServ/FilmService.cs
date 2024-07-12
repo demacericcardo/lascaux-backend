@@ -22,41 +22,14 @@ namespace BL.Services.FilmServ
         public async Task<ServiceResponse<IEnumerable<FilmOutputDto>>> GetAllAsync()
         {
             ServiceResponse<IEnumerable<FilmOutputDto>> response = new();
-            List<FilmOutputDto> data = [];
             try
             {
                 List<Film> entities = await _context.Films
-                    .Include(e => e.Schedules)
+                    .Include(e => e.Schedule)
                     .ThenInclude(e => e.Screen)
                     .ToListAsync();
 
-                foreach (Film entity in entities)
-                {
-                    List<FilmSchedule> scheduleDatas = [];
-                    foreach (Schedule schedule in entity.Schedules)
-                    {
-                        scheduleDatas.Add(new FilmSchedule
-                        {
-                            ScreenId = schedule.Screen.Id,
-                            ScreenName = schedule.Screen.Name,
-                            StartDate = schedule.StartDate,
-                            EndDate = schedule.EndDate
-                        });
-                    }
-
-                    data.Add(new FilmOutputDto
-                    {
-                        Id = entity.Id,
-                        Title = entity.Title,
-                        Director = entity.Director,
-                        Description = entity.Description,
-                        Genre = entity.Genre,
-                        MinuteLenght = entity.MinuteLenght,
-                        Schedules = scheduleDatas
-                    });
-                }
-
-                response.Value = data;
+                response.Value = _mapper.Map<IEnumerable<FilmOutputDto>>(entities);
             }
             catch (Exception ex)
             {
@@ -74,33 +47,12 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films
-                    .Include(e => e.Schedules)
+                    .Include(e => e.Schedule)
                     .ThenInclude(e => e.Screen)
-                    .FirstOrDefaultAsync(e => e.Id == id)
+                    .FirstOrDefaultAsync()
                     ?? throw new Exception("Film not found");
 
-                List<FilmSchedule> scheduleDatas = [];
-                foreach (Schedule schedule in entity.Schedules)
-                {
-                    scheduleDatas.Add(new FilmSchedule
-                    {
-                        ScreenId = schedule.Screen.Id,
-                        ScreenName = schedule.Screen.Name,
-                        StartDate = schedule.StartDate,
-                        EndDate = schedule.EndDate
-                    });
-                }
-
-                response.Value = new FilmOutputDto()
-                {
-                    Id = entity.Id,
-                    Title = entity.Title,
-                    Director = entity.Director,
-                    Description = entity.Description,
-                    Genre = entity.Genre,
-                    MinuteLenght = entity.MinuteLenght,
-                    Schedules = scheduleDatas
-                };
+                response.Value = _mapper.Map<FilmOutputDto>(entity);
             }
             catch (Exception ex)
             {
@@ -180,13 +132,17 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films
-                    .Include(e => e.Schedules)
-                    .FirstOrDefaultAsync(e => e.Id == model.FK_Film)
+                    .Include(e => e.Schedule)
+                    .FirstOrDefaultAsync(e => e.Id == model.Id)
                     ?? throw new Exception("Film not found");
 
-                Schedule newSchedule = _mapper.Map<Schedule>(model);
+                entity.Schedule = new Schedule()
+                {
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate,
+                    FK_Screen = model.FK_Screen
+                };
 
-                entity.Schedules = [newSchedule];
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -205,11 +161,12 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films
-                    .Include(e => e.Schedules)
+                    .Include(e => e.Schedule)
                     .FirstOrDefaultAsync(e => e.Id == id)
                     ?? throw new Exception("Film not found");
 
-                entity.Schedules = [];
+                entity.Schedule = null;
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
