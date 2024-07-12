@@ -1,6 +1,7 @@
 ﻿using BL.Dtos;
 using BL.Responses;
 using BL.Services.FilmServ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -51,6 +53,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create(FilmInputDto model)
         {
@@ -69,6 +72,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> Edit(int id, FilmInputDto model)
         {
@@ -87,6 +91,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -105,6 +110,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> SetSchedule(ScheduleInputDto model)
         {
@@ -123,6 +129,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> CleanSchedule(int id)
         {

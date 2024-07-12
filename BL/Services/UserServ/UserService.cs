@@ -83,58 +83,5 @@ namespace BL.Services.UserServ
 
             return response;
         }
-
-        public async Task<ServiceResponse> CreateAsync()
-        {
-            ServiceResponse response = new();
-
-            try
-            {
-                User newUser = new()
-                {
-                    UserName = "admin",
-                    Email = ""
-                };
-
-                IdentityResult result = await _userManager.CreateAsync(newUser, "admin");
-
-                if (!result.Succeeded)
-                    throw new Exception(result.Errors.Select(e => e.Description).Aggregate((a, b) => $"{a} {b}"));
-
-                await _userManager.AddToRoleAsync(newUser, "Admin");
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccessful = false;
-                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
-            }
-
-            return response;
-        }
-
-        public async Task<ServiceResponse> CreateRoleAsync()
-        {
-            ServiceResponse response = new();
-
-            try
-            {
-                IdentityRole<int> newRole = new()
-                {
-                    Name = "Admin"
-                };
-
-                IdentityResult result = await _roleManager.CreateAsync(newRole);
-
-                if (!result.Succeeded)
-                    throw new Exception(result.Errors.Select(e => e.Description).Aggregate((a, b) => $"{a} {b}"));
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccessful = false;
-                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
-            }
-
-            return response;
-        }
     }
 }

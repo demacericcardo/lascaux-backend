@@ -1,6 +1,7 @@
 ﻿using BL.Dtos;
 using BL.Responses;
 using BL.Services.ScreenServ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LascauxTest.Controllers
@@ -14,6 +15,7 @@ namespace LascauxTest.Controllers
     {
         private readonly IScreenService _screenService = screenService;
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -32,6 +34,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -50,6 +53,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create(ScreenInputDto model)
         {
@@ -68,6 +72,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpPatch("{id}")]
         public async Task<IActionResult> Edit(int id, ScreenInputDto model)
         {
@@ -86,6 +91,7 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

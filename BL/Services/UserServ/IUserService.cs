@@ -8,7 +8,5 @@ namespace BL.Services.UserServ
         Task<ServiceResponse> LoginAsync(UserLoginDto model);
         Task<ServiceResponse> LogoutAsync();
         Task<ServiceResponseStruct<bool>> IsLoggedInAsync();
-        Task<ServiceResponse> CreateAsync();
-        Task<ServiceResponse> CreateRoleAsync();
     }
 }

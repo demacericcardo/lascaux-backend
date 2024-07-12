@@ -131,6 +131,8 @@ namespace BL.Services.FilmServ
 
             try
             {
+                CheckDates(model);
+
                 Film entity = await _context.Films
                     .Include(e => e.Schedule)
                     .FirstOrDefaultAsync(e => e.Id == model.Id)
@@ -176,6 +178,17 @@ namespace BL.Services.FilmServ
             }
 
             return response;
+        }
+
+        private static void CheckDates(ScheduleInputDto model)
+        {
+            if (model.StartDate.Date < DateTime.Now.Date)
+                throw new Exception("The start date must be today or in the future.");
+
+            TimeSpan dateDifference = model.EndDate - model.StartDate;
+
+            if (dateDifference < TimeSpan.FromDays(7) || dateDifference > TimeSpan.FromDays(21))
+                throw new Exception("The schedule must be at least one week and at most three weeks long.");
         }
     }
 }
