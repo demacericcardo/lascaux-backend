@@ -5,6 +5,7 @@ using DAL.Models;
 using DAL.Models.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Storage;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BL.Services.FilmServ
@@ -15,7 +16,6 @@ namespace BL.Services.FilmServ
         IMapper mapper
     ) : IFilmService
     {
-
         private readonly MainDbContext _context = context;
         private readonly IMapper _mapper = mapper;
 
@@ -50,7 +50,7 @@ namespace BL.Services.FilmServ
                     .Include(e => e.Schedule)
                     .ThenInclude(e => e.Screen)
                     .FirstOrDefaultAsync()
-                    ?? throw new Exception("Film not found");
+                    ?? throw new Exception("Film non trovato");
 
                 response.Value = _mapper.Map<FilmOutputDto>(entity);
             }
@@ -89,7 +89,7 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films.FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new Exception("Film not found");
+                    ?? throw new Exception("Film non trovato");
 
                 _mapper.Map(model, entity);
                 _context.Films.Update(entity);
@@ -111,7 +111,7 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films.FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new Exception("Film not found");
+                    ?? throw new Exception("Film non trovato");
 
                 _context.Films.Remove(entity);
                 await _context.SaveChangesAsync();
@@ -136,14 +136,17 @@ namespace BL.Services.FilmServ
                 Film entity = await _context.Films
                     .Include(e => e.Schedule)
                     .FirstOrDefaultAsync(e => e.Id == model.Id)
-                    ?? throw new Exception("Film not found");
+                    ?? throw new Exception("Film non trovato");
 
-                entity.Schedule = new Schedule()
+                if (entity.Schedule != null)
                 {
-                    StartDate = model.StartDate,
-                    EndDate = model.EndDate,
-                    FK_Screen = model.FK_Screen
-                };
+                    _mapper.Map(model, entity.Schedule);
+                }
+                else
+                {
+                    Schedule newSchedule = _mapper.Map<Schedule>(model);
+                    entity.Schedule = newSchedule;
+                }
 
                 await _context.SaveChangesAsync();
             }
@@ -165,7 +168,10 @@ namespace BL.Services.FilmServ
                 Film entity = await _context.Films
                     .Include(e => e.Schedule)
                     .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new Exception("Film not found");
+                    ?? throw new Exception("Film non trovato");
+
+                if (entity.Schedule != null)
+                    _context.Schedules.Remove(entity.Schedule);
 
                 entity.Schedule = null;
 
@@ -183,12 +189,12 @@ namespace BL.Services.FilmServ
         private static void CheckDates(ScheduleInputDto model)
         {
             if (model.StartDate.Date < DateTime.Now.Date)
-                throw new Exception("The start date must be today or in the future.");
+                throw new Exception("La data della programmazione non può essere inserita nel passato");
 
             TimeSpan dateDifference = model.EndDate - model.StartDate;
 
             if (dateDifference < TimeSpan.FromDays(7) || dateDifference > TimeSpan.FromDays(21))
-                throw new Exception("The schedule must be at least one week and at most three weeks long.");
+                throw new Exception("La programmazione dev'essere almeno di 1 settimana e massimo di 3");
         }
     }
 }

@@ -42,7 +42,7 @@ namespace BL.Services.ScreenServ
             try
             {
                 Screen entity = await _context.Screens.FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new Exception("Screen not found");
+                    ?? throw new Exception("Sala non trovata");
 
                 response.Value = _mapper.Map<ScreenOutputDto>(entity);
             }
@@ -81,7 +81,7 @@ namespace BL.Services.ScreenServ
             try
             {
                 Screen entity = await _context.Screens.FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new Exception("Screen not found");
+                    ?? throw new Exception("Sala non trovata");
 
                 _mapper.Map(model, entity);
                 _context.Screens.Update(entity);
@@ -103,7 +103,7 @@ namespace BL.Services.ScreenServ
             try
             {
                 Screen entity = await _context.Screens.FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new Exception("Screen not found");
+                    ?? throw new Exception("Sala non trovata");
 
                 _context.Screens.Remove(entity);
                 await _context.SaveChangesAsync();
