@@ -9,9 +9,9 @@ namespace DAL.Models
         public DateTime EndDate { get; set; }
 
 
-        [ForeignKey(nameof(Sala))]
-        public int FK_Sala { get; set; }
-        public virtual Screen Sala { get; set; } = null!;
+        [ForeignKey(nameof(Screen))]
+        public int FK_Screen { get; set; }
+        public virtual Screen Screen { get; set; } = null!;
 
 
         [ForeignKey(nameof(Film))]

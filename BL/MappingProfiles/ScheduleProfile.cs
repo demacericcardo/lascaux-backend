@@ -9,6 +9,7 @@ namespace BL.MappingProfiles
         public ScheduleProfile()
         {
             CreateMap<ScheduleInputDto, Schedule>();
+            CreateMap<Schedule, ScheduleOutputDto>();
         }
     }
 }

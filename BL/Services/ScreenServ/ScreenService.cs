@@ -35,6 +35,26 @@ namespace BL.Services.ScreenServ
             return response;
         }
 
+        public async Task<ServiceResponse<ScreenOutputDto>> GetByIdAsync(int id)
+        {
+            ServiceResponse<ScreenOutputDto> response = new();
+
+            try
+            {
+                Screen entity = await _context.Screens.FirstOrDefaultAsync(e => e.Id == id)
+                    ?? throw new Exception("Screen not found");
+
+                response.Value = _mapper.Map<ScreenOutputDto>(entity);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
         public async Task<ServiceResponse> CreateAsync(ScreenInputDto model)
         {
             ServiceResponse response = new();

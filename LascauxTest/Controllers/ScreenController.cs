@@ -32,6 +32,24 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                ServiceResponse<ScreenOutputDto> response = await _screenService.GetByIdAsync(id);
+
+                if (!response.IsSuccessful)
+                    return BadRequest(response.ErrorMessage);
+
+                return Ok(response.Value);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message} {ex.InnerException?.Message}");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(ScreenInputDto model)
         {

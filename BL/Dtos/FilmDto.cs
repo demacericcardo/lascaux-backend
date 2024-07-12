@@ -19,5 +19,14 @@ namespace BL.Dtos
         public string? Description { get; set; }
         public FilmGenre Genre { get; set; }
         public int MinuteLenght { get; set; }
+        public IEnumerable<FilmSchedule> Schedules { get; set; } = [];
+    }
+
+    public class FilmSchedule
+    {
+        public int ScreenId { get; set; }
+        public required string ScreenName { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

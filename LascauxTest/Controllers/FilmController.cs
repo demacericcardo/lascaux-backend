@@ -33,6 +33,24 @@ namespace LascauxTest.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            try
+            {
+                ServiceResponse<FilmOutputDto> response = await _filmService.GetByIdAsync(id);
+
+                if (!response.IsSuccessful)
+                    return BadRequest(response.ErrorMessage);
+
+                return Ok(response.Value);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message} {ex.InnerException?.Message}");
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(FilmInputDto model)
         {
@@ -75,6 +93,42 @@ namespace LascauxTest.Controllers
             try
             {
                 ServiceResponse response = await _filmService.DeleteAsync(id);
+
+                if (!response.IsSuccessful)
+                    return BadRequest(response.ErrorMessage);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message} {ex.InnerException?.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetSchedule(ScheduleInputDto model)
+        {
+            try
+            {
+                ServiceResponse response = await _filmService.SetScheduleAsync(model);
+
+                if (!response.IsSuccessful)
+                    return BadRequest(response.ErrorMessage);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message} {ex.InnerException?.Message}");
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> CleanSchedule(int id)
+        {
+            try
+            {
+                ServiceResponse response = await _filmService.CleanScheduleAsync(id);
 
                 if (!response.IsSuccessful)
                     return BadRequest(response.ErrorMessage);

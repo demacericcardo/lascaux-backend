@@ -4,6 +4,8 @@ using BL.Responses;
 using DAL.Models;
 using DAL.Models.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BL.Services.FilmServ
 {
@@ -20,11 +22,85 @@ namespace BL.Services.FilmServ
         public async Task<ServiceResponse<IEnumerable<FilmOutputDto>>> GetAllAsync()
         {
             ServiceResponse<IEnumerable<FilmOutputDto>> response = new();
+            List<FilmOutputDto> data = [];
+            try
+            {
+                List<Film> entities = await _context.Films
+                    .Include(e => e.Schedules)
+                    .ThenInclude(e => e.Screen)
+                    .ToListAsync();
+
+                foreach (Film entity in entities)
+                {
+                    List<FilmSchedule> scheduleDatas = [];
+                    foreach (Schedule schedule in entity.Schedules)
+                    {
+                        scheduleDatas.Add(new FilmSchedule
+                        {
+                            ScreenId = schedule.Screen.Id,
+                            ScreenName = schedule.Screen.Name,
+                            StartDate = schedule.StartDate,
+                            EndDate = schedule.EndDate
+                        });
+                    }
+
+                    data.Add(new FilmOutputDto
+                    {
+                        Id = entity.Id,
+                        Title = entity.Title,
+                        Director = entity.Director,
+                        Description = entity.Description,
+                        Genre = entity.Genre,
+                        MinuteLenght = entity.MinuteLenght,
+                        Schedules = scheduleDatas
+                    });
+                }
+
+                response.Value = data;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse<FilmOutputDto>> GetByIdAsync(int id)
+        {
+            ServiceResponse<FilmOutputDto> response = new();
 
             try
             {
-                List<Film> entities = await _context.Films.ToListAsync();
-                response.Value = _mapper.Map<IEnumerable<FilmOutputDto>>(entities);
+                Film entity = await _context.Films
+                    .Include(e => e.Schedules)
+                    .ThenInclude(e => e.Screen)
+                    .FirstOrDefaultAsync(e => e.Id == id)
+                    ?? throw new Exception("Film not found");
+
+                List<FilmSchedule> scheduleDatas = [];
+                foreach (Schedule schedule in entity.Schedules)
+                {
+                    scheduleDatas.Add(new FilmSchedule
+                    {
+                        ScreenId = schedule.Screen.Id,
+                        ScreenName = schedule.Screen.Name,
+                        StartDate = schedule.StartDate,
+                        EndDate = schedule.EndDate
+                    });
+                }
+
+                response.Value = new FilmOutputDto()
+                {
+                    Id = entity.Id,
+                    Title = entity.Title,
+                    Director = entity.Director,
+                    Description = entity.Description,
+                    Genre = entity.Genre,
+                    MinuteLenght = entity.MinuteLenght,
+                    Schedules = scheduleDatas
+                };
             }
             catch (Exception ex)
             {
@@ -86,6 +162,54 @@ namespace BL.Services.FilmServ
                     ?? throw new Exception("Film not found");
 
                 _context.Films.Remove(entity);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse> SetScheduleAsync(ScheduleInputDto model)
+        {
+            ServiceResponse response = new();
+
+            try
+            {
+                Film entity = await _context.Films
+                    .Include(e => e.Schedules)
+                    .FirstOrDefaultAsync(e => e.Id == model.FK_Film)
+                    ?? throw new Exception("Film not found");
+
+                Schedule newSchedule = _mapper.Map<Schedule>(model);
+
+                entity.Schedules = [newSchedule];
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.ErrorMessage = $"{ex.Message} {ex.InnerException?.Message}";
+            }
+
+            return response;
+        }
+
+        public async Task<ServiceResponse> CleanScheduleAsync(int id)
+        {
+            ServiceResponse response = new();
+
+            try
+            {
+                Film entity = await _context.Films
+                    .Include(e => e.Schedules)
+                    .FirstOrDefaultAsync(e => e.Id == id)
+                    ?? throw new Exception("Film not found");
+
+                entity.Schedules = [];
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

@@ -10,5 +10,7 @@ namespace DAL.Models
         public string? Description { get; set; }
         public FilmGenre Genre { get; set; }
         public int MinuteLenght { get; set; }
+
+        public virtual ICollection<Schedule> Schedules { get; set; } = new HashSet<Schedule>();
     }
 }
