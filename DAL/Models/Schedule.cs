@@ -14,8 +14,8 @@ namespace DAL.Models
         public DateTime EndDate { get; set; }
 
 
-        [ForeignKey(nameof(Screen))]
+        [ForeignKey(nameof(oneToMany))]
         public int FK_Screen { get; set; }
-        public virtual Screen Screen { get; set; } = null!;
+        public virtual Screen oneToMany { get; set; } = null!;
     }
 }

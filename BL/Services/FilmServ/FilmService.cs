@@ -25,8 +25,8 @@ namespace BL.Services.FilmServ
             try
             {
                 List<Film> entities = await _context.Films
-                    .Include(e => e.Schedule)
-                    .ThenInclude(e => e.Screen)
+                    .Include(e => e.oneToOne)
+                    .ThenInclude(e => e.oneToMany)
                     .ToListAsync();
 
                 response.Value = _mapper.Map<IEnumerable<FilmOutputDto>>(entities);
@@ -47,8 +47,8 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films
-                    .Include(e => e.Schedule)
-                    .ThenInclude(e => e.Screen)
+                    .Include(e => e.oneToOne)
+                    .ThenInclude(e => e.oneToMany)
                     .FirstOrDefaultAsync()
                     ?? throw new Exception("Film non trovato");
 
@@ -134,18 +134,18 @@ namespace BL.Services.FilmServ
                 CheckDates(model);
 
                 Film entity = await _context.Films
-                    .Include(e => e.Schedule)
+                    .Include(e => e.oneToOne)
                     .FirstOrDefaultAsync(e => e.Id == model.Id)
                     ?? throw new Exception("Film non trovato");
 
-                if (entity.Schedule != null)
+                if (entity.oneToOne != null)
                 {
-                    _mapper.Map(model, entity.Schedule);
+                    _mapper.Map(model, entity.oneToOne);
                 }
                 else
                 {
                     Schedule newSchedule = _mapper.Map<Schedule>(model);
-                    entity.Schedule = newSchedule;
+                    entity.oneToOne = newSchedule;
                 }
 
                 await _context.SaveChangesAsync();
@@ -166,14 +166,14 @@ namespace BL.Services.FilmServ
             try
             {
                 Film entity = await _context.Films
-                    .Include(e => e.Schedule)
+                    .Include(e => e.oneToOne)
                     .FirstOrDefaultAsync(e => e.Id == id)
                     ?? throw new Exception("Film non trovato");
 
-                if (entity.Schedule != null)
-                    _context.Schedules.Remove(entity.Schedule);
+                if (entity.oneToOne != null)
+                    _context.Schedules.Remove(entity.oneToOne);
 
-                entity.Schedule = null;
+                entity.oneToOne = null;
 
                 await _context.SaveChangesAsync();
             }
@@ -188,6 +188,9 @@ namespace BL.Services.FilmServ
 
         private static void CheckDates(ScheduleInputDto model)
         {
+            if (model.StartDate >= model.EndDate)
+                throw new Exception("La data di inizio non può essere posteriore o uguale a quella di fine");
+
             if (model.StartDate.Date < DateTime.Now.Date)
                 throw new Exception("La data della programmazione non può essere inserita nel passato");
 
